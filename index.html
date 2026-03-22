@@ -1,20 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en">    
 <head>
     <meta charset="UTF-8">
     <title>Calculator</title>
     <link rel="stylesheet" href="style.css">
-</head>
+    </head>
 
 <body>
-    <div class="calculator">
-        <button class="history-toggle">History</button>
+    <select id="calc-select">
+        <option value="standard">Standard Calculator</option>
+        <option value="scientific">Scientific Calculator</option>
+        <option value="bitconverter">Hex/ Dec/ Bin Converter</option>
+    </select><br>
+
+    <div id="calculators">
+        <div id="standard" class="calc-panel active">
+            <div class="calculator">
+             <button class="history-toggle">History</button>
         <div class="history-panel" id="historyPanel">
             <div class="history-empty" id="historyEmpty">No history yet.</div>
             <button class="history-clear" id="historyClear">Clear History</button>
         </div>
 
-        <div class="display">0</div>
+        <div class="display" id="std-display">0</div>
         <div class="buttons">
 
             <button data-action="clear">AC</button>
@@ -41,131 +49,62 @@
             <button data-action="decimal">.</button>
             <button data-action="equals">=</button>
             <button data-action="clearCurrent">C</button>
-            <!--'C' button added here as I plan on adding a history feature to the calculator.-->
+            
+            </div>
         </div>
+        </div>
+        <div id="scientific" class="calc-panel">
+            <div class="calculator">
+            <button class="history-toggle">History</button>
+        <div class="history-panel" id="sciHistoryPanel">
+            <div class="history-empty" id="SciHistoryEmpty">No history yet.</div>
+            <button class="history-clear" id="SciHistoryClear">Clear History</button>
+        </div>
+
+        <div class="display" id="sci-display">0</div><div class="sci-buttons">  
+            <button data-action="scientific" data-value="sin">sin</button>
+            <button data-action="scientific" data-value="cos">cos</button>
+            <button data-action="scientific" data-value="tan">tan</button>
+            <button data-action="scientific" data-value="log">log</button>
+            <button data-action="scientific" data-value="ln">ln</button>
+            
+            <button data-action="scientific" data-value="sqrt">√</button>
+            <button data-action="scientific" data-value="square">x²</button>
+            <button data-action="scientific" data-value="inv">1/x</button>
+            <button data-action="scientific" data-value="pi">π</button>
+            <button data-action="scientific" data-value="e">e</button>
+          </div>        <div class="buttons">
+                      <button data-action="clear">AC</button>
+            <button data-action="sign">+/-</button>
+            <button data-action="percent">%</button>
+            <button data-action="operator" data-value="/">÷</button>
+
+            <button data-action="digit" data-value="7">7</button>
+            <button data-action="digit" data-value="8">8</button>
+            <button data-action="digit" data-value="9">9</button>
+            <button data-action="operator" data-value="*">×</button>
+
+            <button data-action="digit" data-value="4">4</button>
+            <button data-action="digit" data-value="5">5</button>
+            <button data-action="digit" data-value="6">6</button>
+            <button data-action="operator" data-value="-">-</button>
+
+            <button data-action="digit" data-value="1">1</button>
+            <button data-action="digit" data-value="2">2</button>
+            <button data-action="digit" data-value="3">3</button>
+            <button data-action="operator" data-value="+">+</button>
+
+            <button data-action="digit" data-value="0">0</button>
+            <button data-action="decimal">.</button>
+            <button data-action="equals">=</button>
+            <button data-action="clearCurrent">C</button>
+            
+            </div>
+        </div>
+        </div>
+        <div id="bitconverter" class="calc-panel"></div>
     </div>
-    <script>
-let current = '0';
-let previous = null;
-let operator = null;
-let shouldReset = false;
-const display = document.querySelector('.display');
-const historyPanel = document.getElementById('historyPanel');
-const historyEmpty = document.getElementById('historyEmpty');
-const historyClear = document.getElementById('historyClear');
-const historyToggle = document.querySelector('.history-toggle');
-
-historyToggle.addEventListener('click', () => {
-    historyPanel.classList.toggle('open');
-    historyToggle.textContent = historyPanel.classList.contains('open') ? 'Close History' : 'History';
-});
-
-historyClear.addEventListener('click', () => {
-    historyPanel.querySelectorAll('.history-entry').forEach(entry => entry.remove());
-    historyEmpty.style.display = 'block';
-});
-
-function addToHistory(expression) {
-    historyEmpty.style.display = 'none';
-    const entry = document.createElement('div');
-    entry.classList.add('history-entry');
-    entry.textContent = expression;
-    entry.addEventListener('click', () => {
-    const result = expression.split('=')[1];
-    current = result.trim();
-    shouldReset = true;
-    updateDisplay();    
-});
-
-historyPanel.insertBefore(entry, historyEmpty.nextSibling);
-};
-
-function updateDisplay() {
-    display.textContent = current;
-}
-
-function handleDigit(val) {
-    if (shouldReset) {
-        current = val;
-        shouldReset = false;
-    } else {
-        current = current === '0' ? val : current + val;
-    }
-    updateDisplay();
-
-};
-
-function handleOperator(op) {
-    if (operator && !shouldReset) {
-        calculate();
-    };
-    previous = parseFloat(current);
-    operator = op;
-    shouldReset = true;
-};
-
-function calculate() {
-    if (!operator || previous === null) return;
-
-    const a = previous;
-    const b = parseFloat(current);
-    let result;
-
-    if (operator === '+') result = a + b;
-    else if (operator === '-') result = a - b;
-    else if (operator === '*') result = a * b;
-    else if (operator === '/') {
-        if (b === 0) {
-            current = 'Error';
-            operator = null;
-            previous = null;
-            shouldReset = true;
-            updateDisplay();
-            return;
-        }; 
-        result = a / b;
-    };
-    const opSymbols = { '+': '+', '-': '-', '*': '×', '/': '÷' };
-    const expression = `${a} ${opSymbols[operator]} ${b} = ${result}`;
-    addToHistory(expression);
-    current = result.toString();
-    operator = null;
-    previous = null;
-    shouldReset = true;
-    updateDisplay();
-}
-
-document.querySelectorAll('button').forEach(button => {
-    button.addEventListener('click', () => {
-        const action = button.dataset.action;
-        const value = button.dataset.value;
-
-        if (action === 'digit') handleDigit(value);
-        if (action === 'operator') handleOperator(value);
-        if (action === 'equals') calculate();
-        if (action === 'clear') {
-            current = '0';
-            previous = null;
-            operator = null;
-            shouldReset = false;
-            updateDisplay();
-        };
-        if (action === 'clearCurrent') {
-            current = '0';
-            updateDisplay();
-        };
-        if (action === 'decimal') {
-            if (!current.includes('.')) {
-                current += '.';
-                updateDisplay();
-            };
-        };
-        if (action === 'sign') { current = String(parseFloat(current) * -1); updateDisplay(); };
-        if (action === 'percent') { current = String(parseFloat(current) / 100); updateDisplay(); };
-    });
-});
-
-    </script>
+    <script src="script.js"></script>
 </body>
-
+   
 </html>
