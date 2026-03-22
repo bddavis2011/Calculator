@@ -8,23 +8,29 @@
 
 <body>
     <div class="calculator">
+        <button class="history-toggle">History</button>
+        <div class="history-panel" id="historyPanel">
+            <div class="history-empty" id="historyEmpty">No history yet.</div>
+            <button class="history-clear" id="historyClear">Clear History</button>
+        </div>
+
         <div class="display">0</div>
         <div class="buttons">
 
             <button data-action="clear">AC</button>
-            <button data-action="sign">+/−</button>
+            <button data-action="sign">+/-</button>
             <button data-action="percent">%</button>
-            <button data-action="operator" data-value="÷">÷</button>
+            <button data-action="operator" data-value="/">÷</button>
 
             <button data-action="digit" data-value="7">7</button>
             <button data-action="digit" data-value="8">8</button>
             <button data-action="digit" data-value="9">9</button>
-            <button data-action="operator" data-value="×">×</button>
+            <button data-action="operator" data-value="*">×</button>
 
             <button data-action="digit" data-value="4">4</button>
             <button data-action="digit" data-value="5">5</button>
             <button data-action="digit" data-value="6">6</button>
-            <button data-action="operator" data-value="−">−</button>
+            <button data-action="operator" data-value="-">-</button>
 
             <button data-action="digit" data-value="1">1</button>
             <button data-action="digit" data-value="2">2</button>
@@ -34,7 +40,7 @@
             <button data-action="digit" data-value="0">0</button>
             <button data-action="decimal">.</button>
             <button data-action="equals">=</button>
-            <button data-action ="clearCurrent">C</button>
+            <button data-action="clearCurrent">C</button>
             <!--'C' button added here as I plan on adding a history feature to the calculator.-->
         </div>
     </div>
@@ -44,6 +50,35 @@ let previous = null;
 let operator = null;
 let shouldReset = false;
 const display = document.querySelector('.display');
+const historyPanel = document.getElementById('historyPanel');
+const historyEmpty = document.getElementById('historyEmpty');
+const historyClear = document.getElementById('historyClear');
+const historyToggle = document.querySelector('.history-toggle');
+
+historyToggle.addEventListener('click', () => {
+    historyPanel.classList.toggle('open');
+    historyToggle.textContent = historyPanel.classList.contains('open') ? 'Close History' : 'History';
+});
+
+historyClear.addEventListener('click', () => {
+    historyPanel.querySelectorAll('.history-entry').forEach(entry => entry.remove());
+    historyEmpty.style.display = 'block';
+});
+
+function addToHistory(expression) {
+    historyEmpty.style.display = 'none';
+    const entry = document.createElement('div');
+    entry.classList.add('history-entry');
+    entry.textContent = expression;
+    entry.addEventListener('click', () => {
+    const result = expression.split('=')[1];
+    current = result.trim();
+    shouldReset = true;
+    updateDisplay();    
+});
+
+historyPanel.insertBefore(entry, historyEmpty.nextSibling);
+};
 
 function updateDisplay() {
     display.textContent = current;
@@ -61,6 +96,9 @@ function handleDigit(val) {
 };
 
 function handleOperator(op) {
+    if (operator && !shouldReset) {
+        calculate();
+    };
     previous = parseFloat(current);
     operator = op;
     shouldReset = true;
@@ -76,13 +114,26 @@ function calculate() {
     if (operator === '+') result = a + b;
     else if (operator === '-') result = a - b;
     else if (operator === '*') result = a * b;
-    else if (operator === '/') result = b !== 0 ? a / b : 'Error';
+    else if (operator === '/') {
+        if (b === 0) {
+            current = 'Error';
+            operator = null;
+            previous = null;
+            shouldReset = true;
+            updateDisplay();
+            return;
+        }; 
+        result = a / b;
+    };
+    const opSymbols = { '+': '+', '-': '-', '*': '×', '/': '÷' };
+    const expression = `${a} ${opSymbols[operator]} ${b} = ${result}`;
+    addToHistory(expression);
     current = result.toString();
     operator = null;
     previous = null;
     shouldReset = true;
     updateDisplay();
-};
+}
 
 document.querySelectorAll('button').forEach(button => {
     button.addEventListener('click', () => {
@@ -113,6 +164,7 @@ document.querySelectorAll('button').forEach(button => {
         if (action === 'percent') { current = String(parseFloat(current) / 100); updateDisplay(); };
     });
 });
+
     </script>
 </body>
 
