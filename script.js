@@ -198,3 +198,71 @@ document.querySelectorAll('#standard button').forEach(button => {
         if (action === 'percent') { current = String(parseFloat(current) / 100); updateDisplay(disp); };
     });
 });
+
+const decInput = document.getElementById('dec-input');
+const binInput = document.getElementById('bin-input');
+const hexInput = document.getElementById('hex-input');
+const octInput = document.getElementById('oct-input');
+
+function updateAll(decimal, source) {
+    if (source !== 'dec') decInput.value = decimal;
+    if (source !== 'bin') binInput.value = decimal.toString(2);
+    if (source !== 'hex') hexInput.value = decimal.toString(16).toUpperCase();
+    if (source !== 'oct') octInput.value = decimal.toString(8);
+};
+
+decInput.addEventListener('input', () => {
+    const val = parseInt(decInput.value, 10);
+    if (!isNaN(val)) updateAll(val, 'dec');
+});
+
+binInput.addEventListener('input', () => {
+    const val = parseInt(binInput.value, 2);
+    if (!isNaN(val)) updateAll(val, 'bin');
+}); 
+
+hexInput.addEventListener('input', () => {
+    const val = parseInt(hexInput.value, 16);
+    if (!isNaN(val)) updateAll(val, 'hex');
+});
+
+octInput.addEventListener('input', () => {
+    const val = parseInt(octInput.value, 8);
+    if (!isNaN(val)) updateAll(val, 'oct');
+});
+
+document.getElementById('conv-clear').addEventListener('click', () => {
+    decInput.value = '';
+    binInput.value = '';
+    hexInput.value = '';
+    octInput.value = '';
+});
+
+document.addEventListener('keydown', (e) => {
+    const activePanel = document.querySelector('.calc-panel.active');
+    if (!activePanel || activePanel.id == 'bitconverter') return;
+
+    const disp = activePanel.id === 'standard' ? stdDisplay : sciDisplay;
+    const hPanel = activePanel.id === 'standard' ? historyPanel : sciHistoryPanel;
+    const hEmpty = activePanel.id === 'standard' ? historyEmpty : sciHistoryEmpty;
+
+    if (e.key >= '0' && e.key <= '9') handleDigit(e.key, disp);
+    if (e.key === '.') handleDigit('.', disp);
+    if (e.key === '+' || e.key === '-' || e.key === '*') handleOperator(e.key, disp, hPanel, hEmpty);
+    if (e.key === '/') {
+        e.preventDefault();
+        handleOperator(e.key, disp, hPanel, hEmpty);
+    };
+    if (e.key === 'Enter'|| e.key === '=') calculate(disp, hPanel, hEmpty);
+    if (e.key === 'Backspace') {
+        current = current.length > 1 ? current.slice(0, -1) : '0';
+        updateDisplay(disp);
+    };
+    if (e.key === 'Escape') {
+        current = '0';
+        previous = null;
+        operator = null;
+        shouldReset = false;
+        updateDisplay(disp);
+    };
+});

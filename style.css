@@ -126,3 +126,33 @@ button:active {
     padding: 10px;
     font-size: 14px;
 }
+
+.converter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.converter-row label {
+    color: #2cff28;
+    font-size: 14px;
+    width: 35px;
+    flex-shrink: 0;
+}
+
+.converter-row input {
+    flex: 1;
+    background-color: #555;
+    color: #2cff28;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    font-family: monospace
+}
+
+#conv-clear {
+    width: 100%;
+    margin-top: 4px;
+}
